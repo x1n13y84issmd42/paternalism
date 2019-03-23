@@ -54,12 +54,13 @@ export function TreeGrid(ctx: CanvasRenderingContext2D) {
 			}
 
 			if (theRest) {
+				let maxSides = 20;
 				function rndSides() {
-					return Math.round(lerp(3 + Math.random() * 6, 6, Math.min(1, f * 1.7)));
+					return Math.round(lerp(3 + Math.random() * maxSides, maxSides, Math.min(1, f * 1.7)));
 				}
 
 				function rndPhase() {
-					return lerp(Math.random() * 6, 0, Math.min(1, f * 1.7));
+					return lerp(Math.random() * maxSides, 0, Math.min(1, f * 1.7));
 				}
 
 				function rndScale(t: number) {
