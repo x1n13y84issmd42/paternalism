@@ -1,0 +1,28 @@
+{
+	"include": [
+		"sacred.ts"
+	],
+	"exclude": [
+		"*.js"
+	],
+	"compilerOptions": {
+		"outDir": "out",
+		"module": "umd",
+		"moduleResolution": "node",
+		"allowJs": false,
+		"declaration": true,
+		"experimentalDecorators": true,
+		"noImplicitAny": false,
+		"preserveConstEnums": true,
+		"removeComments": true,
+		"sourceMap": false,
+		"suppressImplicitAnyIndexErrors": true,
+        
+		"target": "es6",
+
+		"lib": [
+			"dom",
+			"es2017"
+		]
+	}
+}
