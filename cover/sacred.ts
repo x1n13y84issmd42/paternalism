@@ -3,6 +3,9 @@ import {polygons} from './symbol.polygons';
 import {pentagons_1} from './symbol.pentagons_1';
 import {garden} from './symbol.garden';
 
+import {grid} from './symbol.grid';
+import {TreeGrid} from './topology.TreeGrid';
+
 function consecrate() {
 	let canvas = (document.getElementById('canvas') as HTMLCanvasElement);
 	canvas.width = window.innerWidth;
@@ -18,7 +21,7 @@ function consecrate() {
 	// polygons(ctx);
 	// pentagons_1(ctx);
 
-	garden(ctx);
+	TreeGrid(ctx);
 }
 
 consecrate();

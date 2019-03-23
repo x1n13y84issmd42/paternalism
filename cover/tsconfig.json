@@ -3,7 +3,9 @@
 		"sacred.ts"
 	],
 	"exclude": [
-		"*.js"
+		"out",
+		"*.js",
+		"*.d.ts",
 	],
 	"compilerOptions": {
 		"outDir": "out",

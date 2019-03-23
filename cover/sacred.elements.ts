@@ -2,11 +2,18 @@ import {XY, Style, Context, deg2rad, Point} from './sacred.types';
 import {Generate} from './sacred.generate';
 
 export function Circle(ctx: Context, xy: XY, style: Style) {
-	ctx.moveTo(xy.x + xy.r, xy.y);
-	ctx.arc(xy.x, xy.y, xy.r, 0, deg2rad(360));
+	Style.config(ctx, xy, style);
+	ctx.beginPath();
+	ctx.moveTo(xy.x + xy.r * xy.s, xy.y);
+	ctx.arc(xy.x, xy.y, xy.r * xy.s, 0, deg2rad(360));
+	ctx.closePath();
+	ctx.stroke();
 }
 
 export function Polygon(ctx: Context, xy: XY, style: Style, sides: number) {
+	Style.config(ctx, xy, style);
+	ctx.beginPath();
+
 	let points = Generate.polygon(xy, sides);
 	let start = points.shift();
 	ctx.moveTo(start.x, start.y);
@@ -16,6 +23,9 @@ export function Polygon(ctx: Context, xy: XY, style: Style, sides: number) {
 	}
 
 	ctx.lineTo(start.x, start.y);
+
+	ctx.closePath();
+	ctx.stroke();
 }
 
 export function VesicaPiscis(ctx: Context, xy: XY, style: Style) {}

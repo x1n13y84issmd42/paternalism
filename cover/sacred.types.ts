@@ -15,6 +15,7 @@ export type Style = {
 	strokeDashFill?: number;	//	How filled the dash should be, 0..1, relative to strokeDashWidth
 	strokeWidth?: number;
 	strokeOpacity?: number;
+	fill?: [number, number, number, number];	//	RGBA 0..1
 };
 
 export namespace Style {
@@ -48,7 +49,19 @@ export namespace Style {
 			dashes = [0, 1];
 		}
 
-        ctx.setLineDash(dashes);
+		ctx.setLineDash(dashes);
+		
+		if (style.fill) {
+			let f = style.fill;
+			f = [
+				f[0] * 255,
+				f[1] * 255,
+				f[2] * 255,
+				f[3]
+			];
+
+			ctx.fillStyle = `rgba(${f.join(',')})`;
+		}
 
 		ctx.lineCap = 'round';
 	}
