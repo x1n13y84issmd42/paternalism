@@ -39,7 +39,7 @@ export function TreeGrid(ctx: CanvasRenderingContext2D) {
 			let theRest = false;
 
 			if (theTree) {
-				style.strokeDashFill = 0.5;
+				style.strokeDashFill = 1;
 				style.strokeWidth = 5;
 			} else if (theFruit) {
 				style.strokeDashFill = 1;
@@ -54,9 +54,9 @@ export function TreeGrid(ctx: CanvasRenderingContext2D) {
 			}
 
 			if (theRest) {
-				let maxSides = 20;
+				let maxSides = 40;
 				function rndSides() {
-					return Math.round(lerp(3 + Math.random() * maxSides, maxSides, Math.min(1, f * 1.7)));
+					return Math.round(lerp(3, maxSides, f));
 				}
 
 				function rndPhase() {
@@ -66,10 +66,14 @@ export function TreeGrid(ctx: CanvasRenderingContext2D) {
 				function rndScale(t: number) {
 					return _xy.s * lerp(Math.random() * 2, t, Math.min(1, f * 1.7));
 				}
+
+				function rndDashFill() {
+					return lerp(Math.random() * 0.5, 1, Math.min(1, f * 1.5));
+				}
 				
-				Polygon(ctx, {..._xy, s: rndScale(1.2), phase: rndPhase()}, {strokeWidth: 2}, rndSides());
-				Polygon(ctx, {..._xy, s: rndScale(0.8), phase: rndPhase()}, {strokeWidth: 2}, rndSides());
-				Polygon(ctx, {..._xy, s: rndScale(0.4), phase: rndPhase()}, {strokeWidth: 2}, rndSides());
+				Polygon(ctx, {..._xy, s: rndScale(1.2), phase: rndPhase()}, {strokeWidth: 2, strokeDashWidth: 2, strokeDashFill: rndDashFill()}, rndSides());
+				Polygon(ctx, {..._xy, s: rndScale(0.8), phase: rndPhase()}, {strokeWidth: 2, strokeDashWidth: 2, strokeDashFill: rndDashFill()}, rndSides());
+				Polygon(ctx, {..._xy, s: rndScale(0.4), phase: rndPhase()}, {strokeWidth: 2, strokeDashWidth: 2, strokeDashFill: rndDashFill()}, rndSides());
 			} else {
 				Circle(ctx, _xy, style);
 			}

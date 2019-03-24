@@ -18,22 +18,31 @@ export type Style = {
 	fill?: [number, number, number, number];	//	RGBA 0..1
 };
 
-export namespace Style {
-	export function config(ctx: Context, xy: XY, style: Style) {
-		xy = {
+export namespace XY {
+	export function def(xy: XY) {
+		return {
 			s: 1,
 			a: 0,
 			phase: 0,
 			...xy,
 		};
+	}
+}
 
-		style = {
+export namespace Style {
+	export function def(style: Style) {
+		return {
 			strokeDashWidth: 1,
 			strokeDashFill: 1,
 			strokeOpacity: 1,
 			strokeWidth: 1,
 			...style,
 		};
+	}
+
+	export function config(ctx: Context, xy: XY, style: Style) {
+		xy = XY.def(xy);
+		style = Style.def(style);
 
 		ctx.strokeStyle = 'black';
 		ctx.lineWidth = (style.strokeWidth * xy.s) || 0.01; // 0 doesn't work as a valid value

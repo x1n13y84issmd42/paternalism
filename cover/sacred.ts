@@ -22,6 +22,7 @@ function consecrate() {
 	// pentagons_1(ctx);
 
 	TreeGrid(ctx);
+//	garden(ctx);
 }
 
 consecrate();

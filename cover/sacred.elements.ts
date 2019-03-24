@@ -2,6 +2,9 @@ import {XY, Style, Context, deg2rad, Point} from './sacred.types';
 import {Generate} from './sacred.generate';
 
 export function Circle(ctx: Context, xy: XY, style: Style) {
+	xy = XY.def(xy);
+	style = Style.def(style)
+
 	Style.config(ctx, xy, style);
 	ctx.beginPath();
 	ctx.moveTo(xy.x + xy.r * xy.s, xy.y);
@@ -11,6 +14,9 @@ export function Circle(ctx: Context, xy: XY, style: Style) {
 }
 
 export function Polygon(ctx: Context, xy: XY, style: Style, sides: number) {
+	xy = XY.def(xy);
+	style = Style.def(style)
+
 	Style.config(ctx, xy, style);
 	ctx.beginPath();
 
@@ -31,6 +37,9 @@ export function Polygon(ctx: Context, xy: XY, style: Style, sides: number) {
 export function VesicaPiscis(ctx: Context, xy: XY, style: Style) {}
 
 export function Polygram(ctx: Context, xy: XY, style: Style, sides: number, step = 2) {
+	xy = XY.def(xy);
+	style = Style.def(style)
+
 	let points = Generate.polygon(xy, sides);
 	let start = points[0];
 	ctx.moveTo(start.x, start.y);
@@ -79,6 +88,9 @@ export function Dots(ctx: Context, points: Point[], r: number) {
 export function DaysOfCreation(ctx: Context, xy: XY, style: Style) {}
 
 export function EggOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
+	xy = XY.def(xy);
+	style = Style.def(style)
+
 	r = r || xy.r * 0.75;
 	let points = Generate.polygon(xy, 6);
 	points = [
@@ -103,6 +115,9 @@ export function EggOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
 }
 
 export function TreeOfLife(ctx: Context, xy: XY, style: Style, leafR = 10) {
+	xy = XY.def(xy);
+	style = Style.def(style)
+	
 	let points = Generate.treeOfLife(xy);
 	let ptFruit = points[points.length - 1];
 	Dots(ctx, points.slice(0, points.length - 1), leafR);
@@ -115,6 +130,9 @@ export function TreeOfLife(ctx: Context, xy: XY, style: Style, leafR = 10) {
 }
 
 export function SeedOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
+	xy = XY.def(xy);
+	style = Style.def(style)
+
 	r = r || xy.r / 2;
 	let pts61 = Generate.polygon({...xy, r: xy.r/2}, 6);
 	let pts62 = Generate.polygon(xy, 6);
@@ -138,19 +156,18 @@ export function SeedOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
 
 	let gco = ctx.globalCompositeOperation;
 	ctx.globalCompositeOperation = 'source-atop';
-	ctx.beginPath();
 	
 	for (let pt of pts) {
-		Circle(ctx, {...xy, x: pt.x, y:pt.y, r: r}, {});
+		Circle(ctx, {...xy, x: pt.x, y:pt.y, r: r}, style);
 	}
-	
-	ctx.closePath();
-	ctx.stroke();
 	
 	ctx.globalCompositeOperation = gco;
 }
 
 export function FlowerOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
+	xy = XY.def(xy);
+	style = Style.def(style);
+
 	r = r || xy.r / 2;
 	let pts61 = Generate.polygon({...xy, r: xy.r/2}, 6);
 	let pts62 = Generate.polygon(xy, 6);
@@ -163,48 +180,45 @@ export function FlowerOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
 	let ptC = Generate.center(pts61);
 	let pts = [ptC].concat(pts61, pts62, pts62mid);
 	
-	Style.config(ctx, xy, style);
-	ctx.beginPath();
-	
 	for (let pt of pts) {
-		Circle(ctx, {...xy, x: pt.x, y:pt.y, r: r}, {});
+		Circle(ctx, {...xy, x: pt.x, y:pt.y, r: r}, style);
 	}
-	
-	ctx.closePath();
-	ctx.stroke();
 }
 
 export function FruitOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
+	xy = XY.def(xy);
+	style = Style.def(style)
+
 	r = r || xy.r / 4;
 	let pts61 = Generate.polygon({...xy, r: xy.r/2}, 6);
 	let pts62 = Generate.polygon(xy, 6);
 	let ptC = Generate.center(pts61);
 	let pts = [ptC].concat(pts61, pts62);
 	
-	Style.config(ctx, xy, style);
-	ctx.beginPath();
-	
 	for (let pt of pts) {
-		Circle(ctx, {...xy, x: pt.x, y:pt.y, r: r}, {});
+		Circle(ctx, {...xy, x: pt.x, y:pt.y, r: r}, style);
 	}
-	
-	ctx.closePath();
-	ctx.stroke();
 }
 
 export function MetatronsCube(ctx: Context, xy: XY, style: Style, r?: number) {
+	xy = XY.def(xy);
+	style = Style.def(style)
+
 	r = r || xy.r / 4;
 	let pts61 = Generate.polygon({...xy, r: xy.r/2}, 6);
 	let pts62 = Generate.polygon(xy, 6);
 	let ptC = Generate.center(pts61);
 	let pts = [ptC].concat(pts61, pts62);
-	
+
+	for (let pt of pts) {
+		Circle(ctx, {...xy, x: pt.x, y:pt.y, r: r}, {});
+	}
+
 	Style.config(ctx, xy, style);
 	ctx.beginPath();
 
 	for (let pt of pts) {
 		ctx.moveTo(pt.x, pt.y);
-		Circle(ctx, {...xy, x: pt.x, y:pt.y, r: r}, {});
 		
 		for (let i=0; i<pts.length; i++) {
 			ctx.lineTo(pts[i].x, pts[i].y);

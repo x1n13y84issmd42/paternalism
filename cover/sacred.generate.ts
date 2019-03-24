@@ -7,6 +7,7 @@ export namespace Generate {
 	 * @param sides Number of sides.
 	 */
 	export function polygon(xy: XY, sides: number) {
+		let s = xy.s || 1;
 		sides = Math.max(sides, 3);
 		let points: Point[] = [];
 		let aStep = 360 / sides;
@@ -16,8 +17,8 @@ export namespace Generate {
 
 		for (let i=0; i<sides; i++) {
 			points.push({
-				x: xy.x + Math.cos(deg2rad(aOffset + i * aStep)) * xy.r * xy.s,
-				y: xy.y + Math.sin(deg2rad(aOffset + i * aStep)) * xy.r * xy.s
+				x: xy.x + Math.cos(deg2rad(aOffset + i * aStep)) * xy.r * s,
+				y: xy.y + Math.sin(deg2rad(aOffset + i * aStep)) * xy.r * s
 			});
 		}
 
