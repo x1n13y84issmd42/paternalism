@@ -1,4 +1,5 @@
-import { Point } from "./sacred.types";
+import { Point, XY } from "./sacred.types";
+import { Generate } from "./sacred.generate";
 
 export namespace Forces {
 	/**
@@ -11,8 +12,9 @@ export namespace Forces {
 	export function radial(p: Point, center: Point, r: number) {
 		let vX = center.x - p.x;
 		let vY = center.y - p.y;
+		let d = Math.sqrt(vX*vX + vY*vY);
 
-		return 1 - Math.min(1, Math.sqrt(vX*vX + vY*vY) / r);
+		return  (d < r) ? 1 - Math.min(1, d / r) : 0;
 	}
 
 	/**
@@ -54,5 +56,17 @@ export namespace Forces {
 		}
 
 		return isFruit || isCrown || isStem;
+	}
+
+	export function treeOfLifeKernel(p: Point, xy: XY, r) {
+		let points = Generate.treeOfLife(xy);
+		for (let tp of points) {
+			let f = radial(p, tp, r);
+			if (f) {
+				return f; 
+			}
+		}
+
+		return 0;
 	}
 }

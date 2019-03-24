@@ -3,7 +3,7 @@ import {Generate} from './sacred.generate';
 
 export function Circle(ctx: Context, xy: XY, style: Style) {
 	xy = XY.def(xy);
-	style = Style.def(style)
+	style = Style.def(style);
 
 	Style.config(ctx, xy, style);
 	ctx.beginPath();
@@ -15,7 +15,7 @@ export function Circle(ctx: Context, xy: XY, style: Style) {
 
 export function Polygon(ctx: Context, xy: XY, style: Style, sides: number) {
 	xy = XY.def(xy);
-	style = Style.def(style)
+	style = Style.def(style);
 
 	Style.config(ctx, xy, style);
 	ctx.beginPath();
@@ -38,7 +38,7 @@ export function VesicaPiscis(ctx: Context, xy: XY, style: Style) {}
 
 export function Polygram(ctx: Context, xy: XY, style: Style, sides: number, step = 2) {
 	xy = XY.def(xy);
-	style = Style.def(style)
+	style = Style.def(style);
 
 	let points = Generate.polygon(xy, sides);
 	let start = points[0];
@@ -89,7 +89,7 @@ export function DaysOfCreation(ctx: Context, xy: XY, style: Style) {}
 
 export function EggOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
 	xy = XY.def(xy);
-	style = Style.def(style)
+	style = Style.def(style);
 
 	r = r || xy.r * 0.75;
 	let points = Generate.polygon(xy, 6);
@@ -116,7 +116,7 @@ export function EggOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
 
 export function TreeOfLife(ctx: Context, xy: XY, style: Style, leafR = 10) {
 	xy = XY.def(xy);
-	style = Style.def(style)
+	style = Style.def(style);
 	
 	let points = Generate.treeOfLife(xy);
 	let ptFruit = points[points.length - 1];
@@ -131,7 +131,7 @@ export function TreeOfLife(ctx: Context, xy: XY, style: Style, leafR = 10) {
 
 export function SeedOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
 	xy = XY.def(xy);
-	style = Style.def(style)
+	style = Style.def(style);
 
 	r = r || xy.r / 2;
 	let pts61 = Generate.polygon({...xy, r: xy.r/2}, 6);
@@ -166,7 +166,7 @@ export function SeedOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
 
 export function FlowerOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
 	xy = XY.def(xy);
-	style = Style.def(style);
+	style = Style.def(style);;
 
 	r = r || xy.r / 2;
 	let pts61 = Generate.polygon({...xy, r: xy.r/2}, 6);
@@ -187,7 +187,7 @@ export function FlowerOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
 
 export function FruitOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
 	xy = XY.def(xy);
-	style = Style.def(style)
+	style = Style.def(style);
 
 	r = r || xy.r / 4;
 	let pts61 = Generate.polygon({...xy, r: xy.r/2}, 6);
@@ -202,7 +202,7 @@ export function FruitOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
 
 export function MetatronsCube(ctx: Context, xy: XY, style: Style, r?: number) {
 	xy = XY.def(xy);
-	style = Style.def(style)
+	style = Style.def(style);
 
 	r = r || xy.r / 4;
 	let pts61 = Generate.polygon({...xy, r: xy.r/2}, 6);
@@ -226,6 +226,62 @@ export function MetatronsCube(ctx: Context, xy: XY, style: Style, r?: number) {
 		}
 	}
 	
+	ctx.closePath();
+	ctx.stroke();
+}
+
+export function Cube(ctx: Context, xy: XY, style: Style, backStyle?: Style) {
+	xy = XY.def(xy);
+	style = Style.def(style);
+	backStyle = backStyle || {
+		strokeDashWidth: 0.2,
+		strokeDashFill: 0.5,
+		strokeWidth: style.strokeDashWidth / 2,
+	};
+
+	let pts6 = Generate.polygon(xy, 6);
+	let center = Generate.center(pts6);
+
+	//	Back edges
+	Style.config(ctx, xy, backStyle);
+	ctx.beginPath();
+		ctx.moveTo(pts6[0].x, pts6[0].y);
+		ctx.lineTo(center.x, center.y);
+		ctx.moveTo(pts6[2].x, pts6[2].y);
+		ctx.lineTo(center.x, center.y);
+		ctx.moveTo(pts6[4].x, pts6[4].y);
+		ctx.lineTo(center.x, center.y);
+
+		//TODO:	figure out and fix this.
+		//	There is a weird bug somewhere which makes the last line in this path to be stroked solid.
+		//	So making the last line in the same points as one of the front edges,
+		//	so front edge covers it.
+		ctx.moveTo(pts6[1].x, pts6[1].y);
+		ctx.lineTo(center.x, center.y);
+	ctx.closePath();
+	ctx.stroke();
+
+	//	Outline & front edges
+	Style.config(ctx, xy, style);
+	ctx.beginPath();
+		ctx.moveTo(pts6[1].x, pts6[1].y);
+		ctx.lineTo(center.x, center.y);
+		ctx.moveTo(pts6[3].x, pts6[3].y);
+		ctx.lineTo(center.x, center.y);
+		ctx.moveTo(pts6[5].x, pts6[5].y);
+		ctx.lineTo(center.x, center.y);
+	ctx.closePath();
+	ctx.stroke();
+
+	ctx.beginPath();
+		let start = pts6.shift();
+		ctx.moveTo(start.x, start.y);
+
+		for (let p of pts6) {
+			ctx.lineTo(p.x, p.y);
+		}
+
+		ctx.lineTo(start.x, start.y);
 	ctx.closePath();
 	ctx.stroke();
 }

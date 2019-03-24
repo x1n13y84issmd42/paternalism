@@ -1,5 +1,6 @@
 import {XY, Context, Point, Style, Order} from './sacred.types';
 import { Forces } from './sacred.forces';
+import { TreeOfLife } from './sacred.elements';
 
 export function TreeGrid_2(ctx: Context, order: Order) {
 	let gridW = ctx.canvas.width;
@@ -20,17 +21,25 @@ export function TreeGrid_2(ctx: Context, order: Order) {
 					yOff = gridStepH/1.8;
 				}
 				
-				yield {x, y};
+				yield {x, y: y+yOff};
 			xI++;}
 
 		yI++;}
 	};
 
+	let treeXY: XY = {x: 700, y: 300, r: 170};
+	let treeR = 100;
+
 	//	Forces
 	function ForceFields(p: Point): number[] {
-		let fFocal = Forces.radial(p, {x: gridW / 2, y: gridH / 2}, gridW / 2);
 
-		return [fFocal];
+		let fFocal = Forces.radial(p, {x: gridW / 2, y: gridH / 2}, gridW / 2);
+		let fTree = Forces.treeOfLifeKernel(p, treeXY, treeR);
+
+		return [
+			fTree,
+			fFocal,
+		];
 	}
 
 	order(ctx, I, ForceFields);

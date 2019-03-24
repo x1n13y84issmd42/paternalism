@@ -109,10 +109,16 @@ export type Symbol = (ctx: Context, xy: XY, style: Style, v: number) => void
  * Forces are another vital part of Topologies.
  * They are 0..1 values that provided by Topologies to the
  * supplied Orders and allow to modify certain properties or theirs.
+ * 
  * Forces influence the final composition considerably, so it is recommended
  * for a Topology developer/designer to order their forces so the most
  * important composition-wise forces are at the beginning of the list
  * and the least important ones are at the end.
+ * 
+ * For example, if there is a center piece to your Topology which is
+ * defined by a force field, put that force the very first in list.
+ * The Order developer would just follow the same convention and use it for
+ * some comples Symbols.
  */
 export type ForceFields = (p: Point) => number[];
 
