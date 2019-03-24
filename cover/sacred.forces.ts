@@ -17,13 +17,13 @@ export namespace Forces {
 
 	/**
 	 * Tests if given grid cell is a part of the Tree of Life structure.
-	 * Implies grid structure produced by the TreeGrid topology.
+	 * Works with grid and indexes in it, and implies the grid structure produced by the TreeGrid topology.
 	 * @param p A point to test. Values are 0-based indexes in a 2D array of grid points.
 	 * @param gridW Grid width.
 	 * @param gridH Grid height.
 	 * @param gridStep Grid step.
 	 */
-	export function treeOfLife(p: Point, gridW: number, gridH: number, gridStepH: number, gridStepV: number, fruit=true, crown=true, stem=true) {
+	export function treeOfLifeGrid(p: Point, gridW: number, gridH: number, gridStepH: number, gridStepV: number, fruit=true, crown=true, stem=true) {
 		let c: Point = {x: Math.floor((gridW / gridStepH) / 2), y: Math.floor((gridH / gridStepV) / 2)};
 		let isFruit = false;
 		let isCrown = false;

@@ -32,11 +32,11 @@ export function TreeGrid(ctx: CanvasRenderingContext2D) {
 			}
 
 			let f = Forces.radial({x, y}, {x: gridW / 2, y: gridH / 2}, gridW / 2);
-			let _xy = {x, y: y+yOff, r: 45, s: f};
-			let theTree = Forces.treeOfLife({x: xI, y: yI}, gridW, gridH, gridStepH, gridStepV, false, true, true);
-			let theStem = Forces.treeOfLife({x: xI, y: yI}, gridW, gridH, gridStepH, gridStepV, false, false, true);
-			let theFruit = Forces.treeOfLife({x: xI, y: yI}, gridW, gridH, gridStepH, gridStepV, true, false, false);
+			let theTree = Forces.treeOfLifeGrid({x: xI, y: yI}, gridW, gridH, gridStepH, gridStepV, false, true, true);
+			let theStem = Forces.treeOfLifeGrid({x: xI, y: yI}, gridW, gridH, gridStepH, gridStepV, false, false, true);
+			let theFruit = Forces.treeOfLifeGrid({x: xI, y: yI}, gridW, gridH, gridStepH, gridStepV, true, false, false);
 			let theRest = false;
+			let _xy = {x, y: y+yOff, r: 45, s: f};
 
 			if (theTree) {
 				style.strokeDashFill = 1;

@@ -6,6 +6,9 @@ import {garden} from './symbol.garden';
 import {grid} from './symbol.grid';
 import {TreeGrid} from './topology.TreeGrid';
 
+import {TreeGrid_2} from './topology.TreeGrid_2';
+import { Orders } from './order.Circles_1';
+
 function consecrate() {
 	let canvas = (document.getElementById('canvas') as HTMLCanvasElement);
 	canvas.width = window.innerWidth;
@@ -21,8 +24,11 @@ function consecrate() {
 	// polygons(ctx);
 	// pentagons_1(ctx);
 
-	TreeGrid(ctx);
-//	garden(ctx);
+	//	garden(ctx);
+
+	//	TreeGrid(ctx);
+
+	TreeGrid_2(ctx, Orders.Circles_1);
 }
 
 consecrate();

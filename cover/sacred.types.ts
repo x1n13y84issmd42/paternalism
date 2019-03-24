@@ -93,3 +93,37 @@ export namespace Point {
 		return {x: p1.x + p2.x, y: p1.y + p2.y};
 	}
 }
+
+/**
+ * For efficiency reasons and encouraging of good coding practices
+ * Topologies are supposed to use generators for their Point fields.
+ */
+export type Points = () => IterableIterator<Point>;
+
+/**
+ * Symbols are complex shapes made of Elements.
+ */
+export type Symbol = (ctx: Context, xy: XY, style: Style, v: number) => void
+
+/**
+ * Forces are another vital part of Topologies.
+ * They are 0..1 values that provided by Topologies to the
+ * supplied Orders and allow to modify certain properties or theirs.
+ * Forces influence the final composition considerably, so it is recommended
+ * for a Topology developer/designer to order their forces so the most
+ * important composition-wise forces are at the beginning of the list
+ * and the least important ones are at the end.
+ */
+export type ForceFields = (p: Point) => number[];
+
+/**
+ * Topology is a top-level structure that defines
+ * the "template" of some composition, by providing access to Points and Force
+ * for the Orders.
+ */
+export type Topology = (ctx: Context, order: Order) => void;
+
+/**
+ * Orders exist on Topologies and define how those are filled and with what.
+ */
+export type Order = (ctx: Context, points: Points, forces: ForceFields) => void;
