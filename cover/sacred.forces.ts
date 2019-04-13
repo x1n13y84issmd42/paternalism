@@ -1,5 +1,6 @@
-import { Point, XY } from "./sacred.types";
-import { Generate } from "./sacred.generate";
+import { Point, XY, StructuredForceFields } from "./sacred.types";
+import * as Generate from "./sacred.generate";
+import * as SMath from "./sacred.math";
 
 export namespace Forces {
 	/**
@@ -15,6 +16,15 @@ export namespace Forces {
 		let d = Math.sqrt(vX*vX + vY*vY);
 
 		return  (d < r) ? 1 - Math.min(1, d / r) : 0;
+	}
+
+	export function radialWave(p: Point, center: Point, r: number, waves: number, phase=0) {
+		let vX = center.x - p.x;
+		let vY = center.y - p.y;
+		let d = Math.sqrt(vX*vX + vY*vY);
+		d = (d < r) ? Math.min(1, d / r) : 0;
+
+		return  Math.sin(phase + d * waves * Math.PI);
 	}
 
 	/**
@@ -59,14 +69,35 @@ export namespace Forces {
 	}
 
 	export function treeOfLifeKernel(p: Point, xy: XY, r) {
-		let points = Generate.treeOfLife(xy);
-		for (let tp of points) {
-			let f = radial(p, tp, r);
-			if (f) {
-				return f; 
-			}
-		}
+		return Generate.treeOfLife(xy).reduce((prev, curr, i, pts) => Math.max(prev, radial(p, curr, r)), 0);
+	}
 
-		return 0;
+	export function line(p: Point, a: Point, b: Point, r: number) {
+		let d = SMath.distance(p, a, b);
+		return d <= r ? (1-d/r) : 0;
+	}
+}
+
+export namespace Reducers {
+	export function sum(forces: StructuredForceFields) {
+		return {
+			major: forces.major.reduce((a, b) => Math.min(a+b, 1), 0),
+			minor: forces.minor.reduce((a, b) => Math.min(a+b, 1), 0),
+		};
+	}
+
+	export function mergedSum(forces: StructuredForceFields) {
+		return [].concat(forces.major, forces.minor).reduce((a, b) => Math.min(a+b, 1), 0);
+	}
+
+	export function max(forces: StructuredForceFields) {
+		return {
+			major: forces.major.reduce((a, b) => Math.max(a, b), 0),
+			minor: forces.minor.reduce((a, b) => Math.max(a, b), 0),
+		};
+	}
+
+	export function mergedMax(forces: StructuredForceFields) {
+		return [].concat(forces.major, forces.minor).reduce((a, b) => Math.max(a, b), 0);
 	}
 }

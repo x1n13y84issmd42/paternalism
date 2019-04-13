@@ -1,23 +1,39 @@
-import {XY, Style, Context, deg2rad, Point} from './sacred.types';
-import {Generate} from './sacred.generate';
+import {XY, Style, Context, Point, ForceFields} from './sacred.types';
+import * as Generate from './sacred.generate';
+import { deg2rad, Vector, Color, RGBA } from './sacred.math';
 
 export function Circle(ctx: Context, xy: XY, style: Style) {
 	xy = XY.def(xy);
 	style = Style.def(style);
 
-	Style.config(ctx, xy, style);
+	let ops = Style.config(ctx, xy, style);
 	ctx.beginPath();
 	ctx.moveTo(xy.x + xy.r * xy.s, xy.y);
 	ctx.arc(xy.x, xy.y, xy.r * xy.s, 0, deg2rad(360));
 	ctx.closePath();
 	ctx.stroke();
+	ops.fill();
+}
+
+export function Line(ctx: Context, a: Point, b: Point, style: Style, scale = 1) {
+	let xy = XY.def({...a, r: 1, s: 1});
+	style = Style.def(style);
+	xy.s = scale
+	xy.r = Vector.length(Point.sub(a, b));
+
+	Style.config(ctx, xy, style);
+	ctx.beginPath();
+	ctx.moveTo(a.x, a.y);
+	ctx.lineTo(b.x, b.y);
+	ctx.stroke();
+	ctx.closePath();
 }
 
 export function Polygon(ctx: Context, xy: XY, style: Style, sides: number) {
 	xy = XY.def(xy);
 	style = Style.def(style);
 
-	Style.config(ctx, xy, style);
+	let ops = Style.config(ctx, xy, style);
 	ctx.beginPath();
 
 	let points = Generate.polygon(xy, sides);
@@ -32,13 +48,17 @@ export function Polygon(ctx: Context, xy: XY, style: Style, sides: number) {
 
 	ctx.closePath();
 	ctx.stroke();
+	ops.fill();
 }
 
-export function VesicaPiscis(ctx: Context, xy: XY, style: Style) {}
+//export function VesicaPiscis(ctx: Context, xy: XY, style: Style) {}
 
 export function Polygram(ctx: Context, xy: XY, style: Style, sides: number, step = 2) {
 	xy = XY.def(xy);
 	style = Style.def(style);
+
+	Style.config(ctx, xy, style);
+	ctx.beginPath();
 
 	let points = Generate.polygon(xy, sides);
 	let start = points[0];
@@ -64,6 +84,9 @@ export function Polygram(ctx: Context, xy: XY, style: Style, sides: number, step
 	}
 
 	ctx.lineTo(start.x, start.y);
+
+	ctx.closePath();
+	ctx.stroke();
 }
 
 export function Dots(ctx: Context, points: Point[], r: number) {
@@ -85,13 +108,18 @@ export function Dots(ctx: Context, points: Point[], r: number) {
 	}
 }
 
-export function DaysOfCreation(ctx: Context, xy: XY, style: Style) {}
+//export function DaysOfCreation(ctx: Context, xy: XY, style: Style) {}
 
 export function EggOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
 	xy = XY.def(xy);
 	style = Style.def(style);
 
-	r = r || xy.r * 0.75;
+	r = r || xy.r * xy.s * 0.75;
+
+	// let rescale =  xy.r / (xy.r + r);
+	// xy.s *= rescale;
+	// r *= rescale;
+
 	let points = Generate.polygon(xy, 6);
 	points = [
 		points[0],
@@ -105,10 +133,7 @@ export function EggOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
 
 	for (let p of points) {
 		Style.config(ctx, xy, style);
-		ctx.beginPath();
-		Circle(ctx, {x: p.x, y:p.y, r: r}, {});
-		ctx.closePath();
-		ctx.stroke();
+		Circle(ctx, {x: p.x, y:p.y, r: r}, style);
 		ctx.fillStyle = 'white';
 		ctx.fill();
 	}
@@ -185,7 +210,9 @@ export function FlowerOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
 	}
 }
 
-export function FruitOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
+export function FruitOfLife(ctx: Context, xy: XY, style: Style, style2?: Style, r?: number) {
+	style2 = style2 || {...style, fill: style.fill ? Color.mul(style.fill as RGBA, 0.75) : false};
+
 	xy = XY.def(xy);
 	style = Style.def(style);
 
@@ -193,11 +220,16 @@ export function FruitOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
 	let pts61 = Generate.polygon({...xy, r: xy.r/2}, 6);
 	let pts62 = Generate.polygon(xy, 6);
 	let ptC = Generate.center(pts61);
-	let pts = [ptC].concat(pts61, pts62);
 	
-	for (let pt of pts) {
+	for (let pt of pts61) {
+		Circle(ctx, {...xy, x: pt.x, y:pt.y, r: r}, style2);
+	}
+	
+	for (let pt of pts62) {
 		Circle(ctx, {...xy, x: pt.x, y:pt.y, r: r}, style);
 	}
+
+	Circle(ctx, {...xy, x: ptC.x, y:ptC.y, r: r}, style);
 }
 
 export function MetatronsCube(ctx: Context, xy: XY, style: Style, r?: number) {
@@ -233,17 +265,24 @@ export function MetatronsCube(ctx: Context, xy: XY, style: Style, r?: number) {
 export function Cube(ctx: Context, xy: XY, style: Style, backStyle?: Style) {
 	xy = XY.def(xy);
 	style = Style.def(style);
+
 	backStyle = backStyle || {
+		...style,
 		strokeDashWidth: 0.2,
 		strokeDashFill: 0.5,
-		strokeWidth: style.strokeDashWidth / 2,
+		strokeWidth: style.strokeWidth / 2,
+	};
+
+	let frontStyle: Style = {
+		...style,
+	//	fill: false,
 	};
 
 	let pts6 = Generate.polygon(xy, 6);
 	let center = Generate.center(pts6);
 
 	//	Back edges
-	Style.config(ctx, xy, backStyle);
+	let ops = Style.config(ctx, xy, backStyle);
 	ctx.beginPath();
 		ctx.moveTo(pts6[0].x, pts6[0].y);
 		ctx.lineTo(center.x, center.y);
@@ -251,18 +290,63 @@ export function Cube(ctx: Context, xy: XY, style: Style, backStyle?: Style) {
 		ctx.lineTo(center.x, center.y);
 		ctx.moveTo(pts6[4].x, pts6[4].y);
 		ctx.lineTo(center.x, center.y);
-
-		//TODO:	figure out and fix this.
-		//	There is a weird bug somewhere which makes the last line in this path to be stroked solid.
-		//	So making the last line in the same points as one of the front edges,
-		//	so front edge covers it.
 		ctx.moveTo(pts6[1].x, pts6[1].y);
 		ctx.lineTo(center.x, center.y);
 	ctx.closePath();
-	ctx.stroke();
+	ops.stroke();
+
+	//	Front fill
+	if (frontStyle.fill) {
+		let fillTop = Color.mul(frontStyle.fill, 1);
+		let fillR = Color.mul(frontStyle.fill, 0.85);
+		let fillL = Color.mul(frontStyle.fill, 0.7);
+
+		if (! frontStyle._3D) {
+			fillTop = fillR = fillL = frontStyle.fill;
+		}
+
+		let ops = Style.config(ctx, xy, {
+			strokeWidth: 0,
+			fill: fillTop,
+		});
+		
+		ctx.beginPath();
+		ctx.moveTo(pts6[0].x, pts6[0].y);
+		ctx.lineTo(pts6[1].x, pts6[1].y);
+		ctx.lineTo(center.x, center.y);
+		ctx.lineTo(pts6[5].x, pts6[5].y);
+		ctx.closePath();
+		ops.fill();
+		
+		ops = Style.config(ctx, xy, {
+			strokeWidth: 0,
+			fill: fillR,
+		});
+
+		ctx.beginPath();
+		ctx.moveTo(pts6[1].x, pts6[1].y);
+		ctx.lineTo(pts6[2].x, pts6[2].y);
+		ctx.lineTo(pts6[3].x, pts6[3].y);
+		ctx.lineTo(center.x, center.y);
+		ctx.closePath();
+		ops.fill();
+
+		ops = Style.config(ctx, xy, {
+			strokeWidth: 0,
+			fill: fillL,
+		});
+
+		ctx.beginPath();
+		ctx.moveTo(pts6[5].x, pts6[5].y);
+		ctx.lineTo(center.x, center.y);
+		ctx.lineTo(pts6[3].x, pts6[3].y);
+		ctx.lineTo(pts6[4].x, pts6[4].y);
+		ctx.closePath();
+		ops.fill();
+	}
 
 	//	Outline & front edges
-	Style.config(ctx, xy, style);
+	ops = Style.config(ctx, xy, frontStyle);
 	ctx.beginPath();
 		ctx.moveTo(pts6[1].x, pts6[1].y);
 		ctx.lineTo(center.x, center.y);
@@ -271,7 +355,7 @@ export function Cube(ctx: Context, xy: XY, style: Style, backStyle?: Style) {
 		ctx.moveTo(pts6[5].x, pts6[5].y);
 		ctx.lineTo(center.x, center.y);
 	ctx.closePath();
-	ctx.stroke();
+	ops.stroke();
 
 	ctx.beginPath();
 		let start = pts6.shift();
@@ -283,5 +367,64 @@ export function Cube(ctx: Context, xy: XY, style: Style, backStyle?: Style) {
 
 		ctx.lineTo(start.x, start.y);
 	ctx.closePath();
-	ctx.stroke();
+	ops.stroke();
+}
+
+export function Octahedron(ctx: Context, xy: XY, style: Style, backStyle?: Style) {
+	xy = XY.def(xy);
+	style = Style.def(style);
+	backStyle = backStyle || {
+		strokeDashWidth: 0.2,
+		strokeDashFill: 0.5,
+		strokeWidth: style.strokeDashWidth / 2,
+	};
+
+	Polygon(ctx, xy, style, 6);
+	Polygon(ctx, xy, style, 3);
+	Polygon(ctx, {...xy, phase: 0.5}, backStyle, 3);
+}
+
+export function ForceLine(ctx: Context, xy: XY, w: number, h: number, style: Style, ffields: ForceFields, forceLevel: number) {
+	//TODO: render a line where force level is as specified.
+
+	let sampleR = 10;
+
+	for (let y = xy.y - w/2; y < xy.y + w/2; y += sampleR) {
+		for (let x = xy.y - w/2; x < xy.y + w/2; x += sampleR) {
+			//TODO: that circle |/—\ sampling algo
+		}
+	}
+}
+
+export function Spirals(ctx: Context, xy: XY, style: Style, twists: number, spirals: number) {
+	xy = XY.def(xy);
+	style = Style.def(style);
+	Style.config(ctx, xy, style);
+
+	const segmentsPerTwist = Math.max(15, xy.r * xy.s / 100 * 50);	//	30 segments for every 100 pixels of radius (at scale 1)
+	const aStep = 360 / segmentsPerTwist;
+	const numSteps = segmentsPerTwist * twists;
+	
+	for (let sI = 0; sI < spirals; sI++) {
+		let aOffset = 360 / spirals * sI - 90;
+		aOffset += (xy.phase || 0) * 360 / spirals;
+
+		let sr = 0;
+
+		ctx.beginPath();
+		ctx.moveTo(xy.x, xy.y);
+
+		for (let ssI = 0; ssI <= numSteps; ssI++) {
+			let aScale = 1;//Math.abs(1 - sr);	//TODO:	This must be an attempt to dynamicall change resolution of spiral twists
+			let x = xy.x + Math.cos(deg2rad(aOffset + ssI * aStep * aScale)) * xy.r * sr * xy.s;
+			let y = xy.y + Math.sin(deg2rad(aOffset + ssI * aStep * aScale)) * xy.r * sr * xy.s;
+
+			ctx.lineTo(x, y);
+
+			sr += 1 / numSteps;
+		}
+
+		ctx.stroke();
+		ctx.closePath();
+	}
 }

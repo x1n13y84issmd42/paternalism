@@ -1,7 +1,7 @@
 import {XY, Style} from './sacred.types';
 import {Forces} from './sacred.forces';
 import {Circle, Polygon} from './sacred.elements';
-import {Operations} from './sacred.operations';
+import * as Operations from './sacred.operations';
 
 function lerp(a: number, b: number, c: number) {
 	return a * (1 - c) + b * c;

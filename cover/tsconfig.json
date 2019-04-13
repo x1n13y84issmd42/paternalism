@@ -1,6 +1,7 @@
 {
 	"include": [
-		"sacred.ts"
+		"sacred.ts",
+		"framesaver.ts",
 	],
 	"exclude": [
 		"out",
@@ -28,5 +29,5 @@
 			"es6",
 			"es2017"
 		]
-	}
+	},
 }

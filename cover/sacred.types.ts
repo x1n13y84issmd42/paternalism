@@ -15,7 +15,9 @@ export type Style = {
 	strokeDashFill?: number;	//	How filled the dash should be, 0..1, relative to strokeDashWidth
 	strokeWidth?: number;
 	strokeOpacity?: number;
-	fill?: [number, number, number, number];	//	RGBA 0..1
+	fill?: [number, number, number, number] | false;	//	RGBA 0..1
+	stroke?: [number, number, number, number] | false;	//	RGBA 0..1
+	_3D?: boolean;
 };
 
 export namespace XY {
@@ -44,8 +46,23 @@ export namespace Style {
 		xy = XY.def(xy);
 		style = Style.def(style);
 
+		let ops = {
+			fill: () => {},
+			stroke: () => {
+				ctx.stroke();
+			},
+		};
+
 		ctx.strokeStyle = 'black';
-		ctx.lineWidth = (style.strokeWidth * xy.s) || 0.01; // 0 doesn't work as a valid value
+
+		if (style.strokeWidth) {
+			ctx.lineWidth = (style.strokeWidth * xy.s); // 0 doesn't work as a valid value
+		} else {
+			ops.stroke = () => {
+				// ctx.stroke();
+			};
+			
+		}
 
 		var dash = xy.r * xy.s;
         var dashes = [
@@ -55,10 +72,25 @@ export namespace Style {
 
 		//	A fix for the tiniest gaps of [99, 1] and such
 		if (dashes[1] / (xy.r*xy.s) <= 0.03) {
-			dashes = [0, 1];
+			dashes = [];
 		}
 
 		ctx.setLineDash(dashes);
+
+		if (style.stroke) {
+			let f = style.stroke;
+			f = [
+				f[0] * 255,
+				f[1] * 255,
+				f[2] * 255,
+				f[3]
+			];
+
+			ctx.strokeStyle = `rgba(${f.join(',')})`;
+			ops.stroke = () => {
+				ctx.stroke();
+			};
+		}
 		
 		if (style.fill) {
 			let f = style.fill;
@@ -70,17 +102,56 @@ export namespace Style {
 			];
 
 			ctx.fillStyle = `rgba(${f.join(',')})`;
+			ops.fill = () => {
+				ctx.fill();
+			};
 		}
 
+		ctx.lineJoin = 'round';
 		ctx.lineCap = 'round';
+
+		// ctx.shadowBlur = 10;
+		// ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
+
+		// ctx.globalCompositeOperation = 'multiply';
+		ctx.globalCompositeOperation = 'lighter';
+
+		return ops;
 	}
+
+	//	Some default styles
+	export const solid05: Style = {
+		strokeDashWidth: 0.3,
+		strokeDashFill: 1,
+		strokeWidth: 0.5,
+	};
+
+	export const solid1: Style = {
+		strokeDashWidth: 0.3,
+		strokeDashFill: 1,
+		strokeWidth: 1,
+	};
+
+	export const solid2: Style = {
+		strokeDashWidth: 0.3,
+		strokeDashFill: 1,
+		strokeWidth: 2,
+	};
+
+	export const dash1: Style = {
+		strokeDashWidth: 0.3,
+		strokeDashFill: 0.5,
+		strokeWidth: 1,
+	};
+
+	export const dash101: Style = {
+		strokeDashWidth: 0.1,
+		strokeDashFill: 0.5,
+		strokeWidth: 1,
+	};
 }
 
 export type Context = CanvasRenderingContext2D;
-
-export function deg2rad(deg: number) {
-	return deg * Math.PI / 180;
-}
 
 export type Point = {x: number, y: number};
 
@@ -103,7 +174,7 @@ export type Points = () => IterableIterator<Point>;
 /**
  * Symbols are complex shapes made of Elements.
  */
-export type Symbol = (ctx: Context, xy: XY, style: Style, v: number) => void
+export type Symbol = (ctx: Context, xy: XY, style: Style, forceFields: number[]) => void
 
 /**
  * Forces are another vital part of Topologies.
@@ -120,7 +191,12 @@ export type Symbol = (ctx: Context, xy: XY, style: Style, v: number) => void
  * The Order developer would just follow the same convention and use it for
  * some comples Symbols.
  */
-export type ForceFields = (p: Point) => number[];
+export type StructuredForceFields = {
+	major: number[],
+	minor: number[],
+};
+
+export type ForceFields = (p: Point) => StructuredForceFields;
 
 /**
  * Topology is a top-level structure that defines
