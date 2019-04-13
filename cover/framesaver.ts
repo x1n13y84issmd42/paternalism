@@ -6,6 +6,10 @@ import * as debug from 'debug';
 import * as fs from 'fs';
 import bodyParser = require('body-parser');
 
+function pad(v: number, sz: number) {
+	return `0000${v}`.substr(-sz);
+}
+
 const log = debug('framesaver');
 const app = express();
 
@@ -42,7 +46,7 @@ server.listen(80, () => {
 			fs.mkdirSync(frameDir);
 		}
 
-		fs.writeFileSync(`${frameDir}/${frameN}.png`, Buffer.from(data as string, 'base64'));
+		fs.writeFileSync(`${frameDir}/${pad(frameN, 4)}.png`, Buffer.from(data as string, 'base64'));
 		resp.status(200).end();
 	});
 

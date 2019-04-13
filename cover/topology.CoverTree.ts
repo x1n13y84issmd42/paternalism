@@ -45,7 +45,7 @@ export function CoverTree(ctx: Context, order: Order, t: number = 0) {
 		let fLine7 = lineStrength * Forces.line(p, Point.add(center, {x: 700, y: 0}), {x: gridW, y: -(gridW - center.x) / slope}, lineR);
 		let fLine8 = lineStrength * Forces.line(p, Point.add(center, {x: 700, y: 0}), {x: gridW, y: gridW / slope}, lineR);
 
-		let fAngles = Math.min(1, (Math.max(fLine5, fLine6) * fFocal * 1.5) + (Math.max(fLine7, fLine8) * fFocal * 2));
+		let fAngles = Math.min(0.8, (Math.max(fLine5, fLine6) * fFocal * 1.5) + (Math.max(fLine7, fLine8) * fFocal * 2));
 		
 		//	Horizonrtal line
 		let fLineH = lineStrength * Forces.line(p, {x: 0, y: gridH/2}, {x: gridW, y: gridH/2}, 200 + Math.cos(t) * 200);
