@@ -10,7 +10,6 @@ export function TreeGrid_2(ctx: Context, order: Order) {
 	
 	//	An Iterator function - called by an Order function to generate Topology points.
 	function* I() {
-		let yI = 0;
 		for (let y = 0; y < gridH; y += gridStepV) {
 			let xI = 0;
 			for (let x = 0; x < gridW; x += gridStepH) {
@@ -23,8 +22,7 @@ export function TreeGrid_2(ctx: Context, order: Order) {
 				
 				yield {x, y: y+yOff};
 			xI++;}
-
-		yI++;}
+		}
 	};
 
 	let treeXY: XY = {x: 700, y: 300, r: 170};

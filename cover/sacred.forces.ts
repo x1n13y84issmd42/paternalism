@@ -79,6 +79,10 @@ export namespace Forces {
 }
 
 export namespace Reducers {
+	/**
+	 * Sums the values in arrays.
+	 * @param forces Forces.
+	 */
 	export function sum(forces: StructuredForceFields) {
 		return {
 			major: forces.major.reduce((a, b) => Math.min(a+b, 1), 0),
@@ -86,10 +90,18 @@ export namespace Reducers {
 		};
 	}
 
+	/**
+	 * Merges the minor & major forces together, then sums everything up.
+	 * @param forces Forces.
+	 */
 	export function mergedSum(forces: StructuredForceFields) {
 		return [].concat(forces.major, forces.minor).reduce((a, b) => Math.min(a+b, 1), 0);
 	}
 
+	/**
+	 * Returns the strongest forces value from arrays.
+	 * @param forces Forces.
+	 */
 	export function max(forces: StructuredForceFields) {
 		return {
 			major: forces.major.reduce((a, b) => Math.max(a, b), 0),
@@ -97,6 +109,10 @@ export namespace Reducers {
 		};
 	}
 
+	/**
+	 * Returns the strongest of all forces.
+	 * @param forces Forces.
+	 */
 	export function mergedMax(forces: StructuredForceFields) {
 		return [].concat(forces.major, forces.minor).reduce((a, b) => Math.max(a, b), 0);
 	}

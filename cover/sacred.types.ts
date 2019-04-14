@@ -10,6 +10,12 @@ export type XY = {
 	phase?: number,
 };
 
+export enum Blend {
+	add = "lighter",
+	screen = "lighter",
+	multiply = "multiply",
+}
+
 export type Style = {
 	strokeDashWidth?: number;	//	Width of a dash + width of a blank space, 0..1 relative to XY.r
 	strokeDashFill?: number;	//	How filled the dash should be, 0..1, relative to strokeDashWidth
@@ -18,6 +24,8 @@ export type Style = {
 	fill?: [number, number, number, number] | false;	//	RGBA 0..1
 	stroke?: [number, number, number, number] | false;	//	RGBA 0..1
 	_3D?: boolean;
+	opacity?: number;
+	blend?: Blend;
 };
 
 export namespace XY {
@@ -38,6 +46,8 @@ export namespace Style {
 			strokeDashFill: 1,
 			strokeOpacity: 1,
 			strokeWidth: 1,
+			opacity: 1,
+			blend: Blend.screen,
 			...style,
 		};
 	}
@@ -83,7 +93,7 @@ export namespace Style {
 				f[0] * 255,
 				f[1] * 255,
 				f[2] * 255,
-				f[3]
+				f[3] * style.opacity,
 			];
 
 			ctx.strokeStyle = `rgba(${f.join(',')})`;
@@ -98,7 +108,7 @@ export namespace Style {
 				f[0] * 255,
 				f[1] * 255,
 				f[2] * 255,
-				f[3]
+				f[3] * style.opacity,
 			];
 
 			ctx.fillStyle = `rgba(${f.join(',')})`;
@@ -110,11 +120,20 @@ export namespace Style {
 		ctx.lineJoin = 'round';
 		ctx.lineCap = 'round';
 
+		switch (style.blend) {
+			case Blend.screen:
+			case Blend.add:
+				ctx.globalCompositeOperation = 'lighter';
+			break;
+
+			default:
+			case Blend.multiply:
+				ctx.globalCompositeOperation = 'multiply';
+			break;
+		}
+
 		// ctx.shadowBlur = 10;
 		// ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
-
-		// ctx.globalCompositeOperation = 'multiply';
-		ctx.globalCompositeOperation = 'lighter';
 
 		return ops;
 	}

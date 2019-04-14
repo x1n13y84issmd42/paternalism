@@ -18,6 +18,22 @@ export function CoverTree(ctx: Context, order: Order, t: number = 0) {
 		}
 	};
 
+	function* I_off() {
+		for (let y = 0; y < gridH; y += gridStepV) {
+			let xI = 0;
+			for (let x = 0; x < gridW; x += gridStepH) {
+
+				//	Offsetting even columns vertically
+				let yOff = 0;
+				if (xI % 2 === 0) {
+					yOff = gridStepH/1.8;
+				}
+				
+				yield {x, y: y+yOff};
+			xI++;}
+		}
+	};
+
 	//	A force fields function
 	function FFCover(p: Point) {
 
@@ -27,25 +43,35 @@ export function CoverTree(ctx: Context, order: Order, t: number = 0) {
 
 		let fFocal = Forces.radial(p, center, gridW / 1.5);
 		let fFocalWave = Forces.radialWave(p, center, gridW / 1.5, 12, t) * 0.5 + 0.5;
+		fFocalWave = Math.min(1, fFocalWave * 2);
 		let fTree = Forces.treeOfLifeKernel(p, treeXY, treeR);
 
 		let lineStrength = 1;
 		let lineR = 200;
 		lineR = (lineR/2) + Math.sin(t) * (lineR/2);
 		let slope = center.x / center.y;
-		let fLine1 = lineStrength * Forces.line(p, center, {x: 0, y: 0}, lineR);
-		let fLine2 = lineStrength * Forces.line(p, center, {x: gridW, y: -(gridW - center.x) / slope}, lineR);
-		let fLine3 = lineStrength * Forces.line(p, center, {x: 0, y: gridW / slope}, lineR);
-		let fLine4 = lineStrength * Forces.line(p, center, {x: gridW, y: gridW / slope}, lineR);
+		// let fLine1 = lineStrength * Forces.line(p, center, {x: 0, y: 0}, lineR);
+		// let fLine2 = lineStrength * Forces.line(p, center, {x: 0, y: gridW / slope}, lineR);
+
+		//	The angle > line on the left
+		let fLine1 = Forces.line(p, Point.add(center, {x: 0, y: 0}), Point.add(center, {x: 0 - gridH/1.8, y: -gridH/2}), lineR * 0.75);
+		let fLine2 = Forces.line(p, Point.add(center, {x: 0, y: 0}), Point.add(center, {x: 0 - gridH/1.8, y: gridH/2}), lineR * 0.75);
 		
-		//	Two angle << lines on the right
-		let fLine5 = lineStrength * Forces.line(p, Point.add(center, {x: 350, y: 0}), {x: gridW, y: -(gridW - center.x) / slope}, lineR);
-		let fLine6 = lineStrength * Forces.line(p, Point.add(center, {x: 350, y: 0}), {x: gridW, y: gridW / slope}, lineR);
+		//	Three angle <<< lines on the right
+		let fLine3 = Forces.line(p, Point.add(center, {x: 0, y: 0}), Point.add(center, {x: 0 + gridH/1.8, y: -gridH/2}), lineR * 0.75);
+		let fLine4 = Forces.line(p, Point.add(center, {x: 0, y: 0}), Point.add(center, {x: 0 + gridH/1.8, y: gridH/2}), lineR * 0.75);
 
-		let fLine7 = lineStrength * Forces.line(p, Point.add(center, {x: 700, y: 0}), {x: gridW, y: -(gridW - center.x) / slope}, lineR);
-		let fLine8 = lineStrength * Forces.line(p, Point.add(center, {x: 700, y: 0}), {x: gridW, y: gridW / slope}, lineR);
+		let fLine5 = Forces.line(p, Point.add(center, {x: 400, y: 0}), Point.add(center, {x: 400 + gridH/1.8, y: -gridH/2}), lineR * 0.75);
+		let fLine6 = Forces.line(p, Point.add(center, {x: 400, y: 0}), Point.add(center, {x: 400 + gridH/1.8, y: gridH/2}), lineR * 0.75);
 
-		let fAngles = Math.min(0.8, (Math.max(fLine5, fLine6) * fFocal * 1.5) + (Math.max(fLine7, fLine8) * fFocal * 2));
+		let fLine7 = Forces.line(p, Point.add(center, {x: 800, y: 0}), Point.add(center, {x: 800 + gridH/1.8, y: -gridH/2}), lineR * 0.75);
+		let fLine8 = Forces.line(p, Point.add(center, {x: 800, y: 0}), Point.add(center, {x: 800 + gridH/1.8, y: gridH/2}), lineR * 0.75);
+
+		let fAngles = Math.min(0.8, 
+			+ (fLine3 + fLine4) * fFocal
+			+ (fLine5 + fLine6) * fFocal * 1.25
+			+ (fLine7 + fLine8) * fFocal * 1.5
+		);
 		
 		//	Horizonrtal line
 		let fLineH = lineStrength * Forces.line(p, {x: 0, y: gridH/2}, {x: gridW, y: gridH/2}, 200 + Math.cos(t) * 200);
@@ -53,18 +79,18 @@ export function CoverTree(ctx: Context, order: Order, t: number = 0) {
 		return {
 			major: [
 			//	fTree,
+				fFocal,
 				fFocal * fFocalWave,
-			//	fFocal * fFocalWave,
 			],
 			
 			minor: [
 			//	fFocal / 2,
-				Math.min(1, Math.max(fLine1, fLine2, fLine3, fLine4) * fFocal * 1.5),
-				fLineH,
+				Math.min(0.8, Math.max(fLine1, fLine2) * fFocal * 1.5),
+				Math.min(0.8, fLineH * fFocal * 2),
 				fAngles,
 			]
 		};
 	}
 
-	order(ctx, I, FFCover);
+	order(ctx, I_off, FFCover);
 }

@@ -116,9 +116,9 @@ export function EggOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
 
 	r = r || xy.r * xy.s * 0.75;
 
-	// let rescale =  xy.r / (xy.r + r);
-	// xy.s *= rescale;
-	// r *= rescale;
+	let rescale =  xy.r / (xy.r + r);
+	xy.s *= rescale;
+	r *= rescale;
 
 	let points = Generate.polygon(xy, 6);
 	points = [
@@ -134,8 +134,8 @@ export function EggOfLife(ctx: Context, xy: XY, style: Style, r?: number) {
 	for (let p of points) {
 		Style.config(ctx, xy, style);
 		Circle(ctx, {x: p.x, y:p.y, r: r}, style);
-		ctx.fillStyle = 'white';
-		ctx.fill();
+		// ctx.fillStyle = 'white';
+		// ctx.fill();
 	}
 }
 

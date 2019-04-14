@@ -21,25 +21,17 @@ export function Hexa_1(ctx: Context, xy: XY, style: Style, f: number) {
 	// E.Circle(ctx, {...xy, r: xy.r/4}, style1)
 
 	//	Smaller polygons in vertices of the bigger one
-	let polyXY = {...xy, r: xy.r/1.2, s: fn.scale(f, 0.3)};
+	let polyXY = {...xy, r: xy.r/1.2};
 	let polyPoints = G.polygon({...polyXY, s: f}, 6);
 
 	//	Solid and dashed polygons change places as force changes
 	let smRFn = Math.abs(Math.cos((f) * Math.PI));
-	let smR = polyXY.r/3;
+	let smR = polyXY.r/3 * f;
 	let smRV = 2;
 	let smPolyR1 = smR + smRFn * smR/smRV;
-	let smPolyR2 = smR + (1 - smRFn) * smR/smRV;
 
 	for (let pp of polyPoints) {
-		E.Polygon(ctx, {...pp, r: smPolyR2, s: f}, {...style3, fill: style.fill}, 6)
-		/* if (smPolyR1 > smPolyR2) {
-			E.Polygon(ctx, {...pp, r: smPolyR1, s: f}, {...style1, fill: style.fill}, 6)
-			E.Polygon(ctx, {...pp, r: smPolyR2, s: f}, {...style3}, 6)
-		} else {
-			E.Polygon(ctx, {...pp, r: smPolyR2, s: f}, {...style3, fill: style.fill}, 6)
-			E.Polygon(ctx, {...pp, r: smPolyR1, s: f}, {...style1}, 6)
-		} */
+		E.Polygon(ctx, {...pp, r: smPolyR1, s: f}, {...style3, fill: style.fill}, 6)
 	}
 
 	//	Cross lines
@@ -139,8 +131,71 @@ export function EggOfComplexity(ctx: Context, xy: XY, style: Style, f: number) {
 	); */
 }
 
+export function EggOfComplexity_Superchaotic(ctx: Context, xy: XY, style: Style, f: number, chaosThreshold = 0.75) {
+	xy.s = f;
+	let chaos = 0;
+
+	if (f < chaosThreshold) {
+		chaos = (chaosThreshold - f) / chaosThreshold;
+	}
+
+	let eggXY = {...xy, phase: chaos * -2, r: xy.r * (1+(4*chaos))};
+	let eggStyle: Style = {
+		...style,
+		fill: false,
+		strokeDashWidth: 0.1,
+		strokeDashFill: f
+	};
+
+	let polyStyle: Style = {...style, fill: false, strokeWidth: style.strokeWidth / 2, strokeDashWidth: 0.3, strokeDashFill: 0.5};
+
+	E.EggOfLife(ctx, eggXY, eggStyle, xy.r*xy.s*0.75*(1-chaos));
+
+	let eggPoints = G.polygon({...eggXY, r: xy.r * (1 + (4 * chaos))}, 6);
+//	E.Dots(ctx, eggPoints, 8 * f);
+	
+	E.Polygon(ctx, {...eggPoints[0], s: f, r: xy.r * 0.6, phase: 0.5 * f}, polyStyle, 3);
+	E.Polygon(ctx, {...eggPoints[2], s: f, r: xy.r * 0.6, phase: 0.5 * f}, polyStyle, 3);
+	E.Polygon(ctx, {...eggPoints[4], s: f, r: xy.r * 0.6, phase: 0.5 * f}, polyStyle, 3);
+	
+	E.Polygon(ctx, {...eggPoints[1], s: f, r: xy.r * 0.4, phase: 1 * f}, polyStyle, 3);
+	E.Polygon(ctx, {...eggPoints[3], s: f, r: xy.r * 0.4, phase: 1 * f}, polyStyle, 3);
+	E.Polygon(ctx, {...eggPoints[5], s: f, r: xy.r * 0.4, phase: 1 * f}, polyStyle, 3);
+
+	let outwardDots = G.outwards(G.polygon({...eggXY, phase: 0.5}, 6), eggXY.r * 0.5 * f);
+	let lineStyle: Style = {
+		...style,
+		fill: false,
+		strokeWidth: style.strokeWidth / 2,
+		strokeDashWidth: 0.05,
+		strokeDashFill: 0.2,
+	};
+
+	E.Line(ctx, outwardDots[0], outwardDots[3], lineStyle);
+	E.Line(ctx, outwardDots[1], outwardDots[4], lineStyle);
+	E.Line(ctx, outwardDots[2], outwardDots[5], lineStyle);
+
+	/* E.Spirals(
+		ctx,
+		{
+			...eggXY,
+			phase: 0.5,
+			r: eggXY.r * f
+		}, {
+			...style2,
+			strokeWidth: Math.min(1.5, 2 * f),
+		//	strokeDashFill: 1 - 0.7 * f,
+		//	strokeDashWidth: 0.1,
+		},
+		0.5 * f,
+		6
+	); */
+}
+
 export function Hexa_2(ctx: Context, xy: XY, style: Style, f: number) {
 	xy.s = f;
+	xy.phase = (1-f)*2;
+
 	let fSin = fn.f101(f);
 
 	let style1 = {...style, fill: false as false};
@@ -161,16 +216,75 @@ export function Hexa_2(ctx: Context, xy: XY, style: Style, f: number) {
 	
 	let polyR = xy.r/2;
 	let polyRD = xy.r/3;
-	let polyXY1 = {...xy, r: polyR + polyRD*fSin, phase: 0.5};
-	let polyXY2 = {...xy, r: polyR + polyRD*(1-fSin), phase: 0.5, s: f};
+	let polyXY1 = {...xy, r: polyR + polyRD};
+	let polyXY2 = {...xy, r: polyR};
 	
-	E.Polygon(ctx, polyXY2, {...style2, fill: style.fill}, 6);
-	E.Polygon(ctx, polyXY1, style1, 6);
+	//	The inner, filled one
+	E.Polygon(ctx, polyXY2, style2, 6);
+	E.Cube(ctx, polyXY2, style);
 	E.Circle(ctx, polyXY2, style3);
+
+	//	The outer
+	E.Polygon(ctx, polyXY1, style1, 6);
 	
 	let polyMidpoints2 = G.midpoints(G.polygon(polyXY2, 6));
 	
-	let virtualPolyXY = {...polyXY1, phase: 0};
+	let virtualPolyXY = {...polyXY1, r: polyXY1.r + polyXY1.r * (1-f), phase: polyXY2.phase-0.5};
+	let virtualPolyPoints = G.polygon(virtualPolyXY, 6);
+	let virtualPolyMidPoints = G.midpoints(virtualPolyPoints);
+	E.Polygon(ctx, virtualPolyXY, style3, 6);
+	
+	for (let mpI=0; mpI<virtualPolyMidPoints.length; mpI++) {
+		E.Line(ctx, polyMidpoints2[mpI], virtualPolyMidPoints[mpI], style3);
+		E.Line(ctx, virtualPolyMidPoints[mpI], polyMidpoints2[mpI-1] || polyMidpoints2[polyMidpoints2.length-1], style3);
+	}
+}
+
+export function Hexa_2_Chaotic(ctx: Context, xy: XY, style: Style, f: number) {
+	xy.s = f;
+	xy.phase = (1-f)*2;
+
+	let chaos = 0;
+	let fc = 1;
+	let chaosThreshold = 0.95;
+
+	if (f < chaosThreshold) {
+		chaos = (chaosThreshold - f) / chaosThreshold;
+		fc = 1 - (chaosThreshold - f)
+	}
+
+	let style1 = {...style, fill: false as false};
+
+	let style3: Style = {
+		...style,
+		fill: false,
+		strokeWidth: style.strokeWidth / 2,
+		strokeDashWidth: 0.1,
+		strokeDashFill: 0.3,
+	};
+	
+	let style2: Style = {
+		...style1,
+		fill: false,
+		strokeWidth: style1.strokeWidth / 2
+	};
+	
+	let polyR = xy.r/2;
+	let polyRD = xy.r/3;
+	let polyXY1 = {...xy, r: polyR + polyRD};
+	let polyXY2 = {...xy, r: polyR};
+	
+	//	The inner, filled one
+	E.Polygon(ctx, polyXY2, style2, 6);
+	E.Cube(ctx, polyXY2, style);
+	E.Circle(ctx, polyXY2, style3);
+
+	//	The outer
+	E.Polygon(ctx, polyXY1, style1, 6);
+	
+	let polyMidpoints2 = G.midpoints(G.polygon(polyXY2, 6));
+	
+	let virtualPolyXY = {...polyXY1, r: polyXY1.r * (1+(4*chaos)), phase: polyXY2.phase-0.5};
 	let virtualPolyPoints = G.polygon(virtualPolyXY, 6);
 	let virtualPolyMidPoints = G.midpoints(virtualPolyPoints);
 	E.Polygon(ctx, virtualPolyXY, style3, 6);
@@ -407,7 +521,7 @@ export function FruitOfSimplicity_Chaotic(ctx: Context, xy: XY, style: Style, f:
 		fc = 1 - (chaosThreshold - f)
 	}
 
-	let fruitXY = {...xy, phase: chaos};
+	let fruitXY = {...xy, phase: 4 * chaos};
 	E.FruitOfLife(ctx, fruitXY, fruitStyle, undefined, xy.r/4*f);
 }
 
@@ -442,7 +556,7 @@ export function Spiral_1_Chaotic(ctx: Context, xy: XY, style: Style, f: number) 
 
 	let chaos = 1;
 	let fc = 1;
-	let chaosThreshold = 0.75;
+	let chaosThreshold = 0.0;
 
 	if (f < chaosThreshold) {
 		chaos = 1 + (chaosThreshold - f) / chaosThreshold;
@@ -454,12 +568,12 @@ export function Spiral_1_Chaotic(ctx: Context, xy: XY, style: Style, f: number) 
 	let sphereStyle: Style = {...style};
 	let sphereXY: XY = {...xy, r: xy.r * 0.1};
 
-	let numTwists = 1 * fc;
-	let numSpirals = Math.max(3, Math.round(7 * f));
+	let numTwists = 1 * f;
+	let numSpirals = Math.max(3, Math.round(5 * f));
 
 	E.Spirals(ctx, spiralXY, spiralStyle, numTwists, numSpirals);
 	
-	let polyPts = G.polygon({...spiralXY, r: spiralXY.r * chaos, phase: chaos}, numSpirals);
+	let polyPts = G.polygon({...spiralXY, r: spiralXY.r * chaos, phase: 0.5 + 0.5 * f}, numSpirals);
 	
 	for (let pt of polyPts) {
 		E.Circle(ctx, {...sphereXY, ...pt}, sphereStyle);
@@ -520,7 +634,7 @@ export function Spiral_2_Chaotic(ctx: Context, xy: XY, style: Style, f: number) 
 	let chaosThreshold = 0.85;
 
 	if (f < chaosThreshold) {
-		chaos = 1 + (1 - (chaosThreshold - f) / chaosThreshold);
+		chaos = 2 * (1 - (chaosThreshold - f) / chaosThreshold);
 	}
 	
 	let spiralXY: XY = {...xy, r: lerp(xy.r, xy.r*2, 1-f)};
@@ -540,7 +654,50 @@ export function Spiral_2_Chaotic(ctx: Context, xy: XY, style: Style, f: number) 
 	E.Spirals(ctx, spiralXY, spiralStyle, numTwists * f, numSpirals);
 	E.Polygon(ctx, polyXY, polyStyle, numSpirals);
 	
-	let polyPts = G.polygon({...spiralXY, phase: chaos}, numSpirals);
+	let polyPts = G.polygon({...spiralXY, phase: -2 * chaos}, numSpirals);
+	
+	for (let pt of polyPts) {
+		E.Circle(ctx, {...sphereXY, ...pt}, sphereStyle);
+	}
+	
+	// E.Circle(ctx, {...xy, r: sphereXY.r * 2}, sphereStyle);
+}
+
+export function Spiral_2_Superchaotic(ctx: Context, xy: XY, style: Style, f: number, chaosThreshold = 0.85) {
+	xy = XY.def(xy);
+	style = Style.def(style);
+	xy.s = f;
+
+	let spiralStyle: Style = {
+		...style,
+		strokeDashWidth: 0.2,
+		strokeDashFill: f,
+	};
+
+	let chaos = 0;
+
+	if (f < chaosThreshold) {
+		chaos = (chaosThreshold - f) / chaosThreshold;
+	}
+	
+	let spiralXY: XY = {...xy, r: lerp(xy.r, xy.r*2, 1-f)};
+	let polyXY: XY = {...xy, phase: 0.5 * (1 + chaos * 2)};
+	let polyStyle: Style = {
+		...style,
+		fill: false,
+		// strokeDashWidth: 0.2,
+		// strokeDashFill: (1-f),
+	};
+	let sphereStyle: Style = {...style};
+	let sphereXY: XY = {...xy, r: xy.r * 0.1};
+
+	let numTwists = 1;
+	let numSpirals = 3;
+
+	E.Spirals(ctx, spiralXY, spiralStyle, numTwists * f, numSpirals);
+	E.Polygon(ctx, polyXY, polyStyle, numSpirals);
+	
+	let polyPts = G.polygon({...spiralXY, phase: -2 * chaos, r: spiralXY.r * (1+4*chaos)}, numSpirals);
 	
 	for (let pt of polyPts) {
 		E.Circle(ctx, {...sphereXY, ...pt}, sphereStyle);
@@ -579,12 +736,12 @@ export function Cuboids_1_Chaotic(ctx: Context, xy: XY, style: Style, f: number)
 	style = Style.def(style);
 	xy.s = f;
 
-	let chaos = 1;
+	let chaos = 0;
 	let fc = 1;
 	let chaosThreshold = 0.75;
 
 	if (f < chaosThreshold) {
-		chaos = 1.5 + (chaosThreshold - f) / chaosThreshold;
+		chaos = (chaosThreshold - f) / chaosThreshold;
 		fc = 1 - (chaosThreshold - f)
 	}
 
@@ -596,7 +753,40 @@ export function Cuboids_1_Chaotic(ctx: Context, xy: XY, style: Style, f: number)
 
 	let cuboidXY = {...xy, r: xy.r/2};
 	let numCubes = 3;
-	let polyPts = G.polygon({...xy, phase: xy.phase + 0.5 * chaos * chaos, r: xy.r*chaos}, numCubes);
+	let polyPts = G.polygon({...xy, phase: xy.phase + 0.5 * chaos, r: xy.r*(1+chaos)}, numCubes);
+	
+	for (let pt of polyPts) {
+		E.Cube(ctx, {...cuboidXY, ...pt, s: f, phase: 6 * chaos}, cuboidStyle);
+	}
+
+	E.Polygon(ctx, {...xy, phase: 1 * chaos}, {...style, strokeDashWidth: 0.1, strokeDashFill: 0.5, fill: false}, numCubes);
+	E.Polygon(ctx, {...xy, phase: 0.6 * fc}, {...style, strokeDashWidth: 0.1, strokeDashFill: 0.5, fill: false}, numCubes);
+	// E.Polygon(ctx, {...xy, phase: 1}, {...style, strokeDashWidth: 0.1, strokeDashFill: 0.5, fill: false}, 3);
+	// E.Polygon(ctx, {...xy, phase: 1}, {...style, strokeDashWidth: 0.1, strokeDashFill: 0.5, fill: false}, 5);
+}
+
+export function Cuboids_1_Superchaotic(ctx: Context, xy: XY, style: Style, f: number, chaosThreshold = 0.5) {
+	xy = XY.def(xy);
+	style = Style.def(style);
+	xy.s = f;
+
+	let chaos = 0;
+	let fc = 1;
+
+	if (f < chaosThreshold) {
+		chaos = (chaosThreshold - f) / chaosThreshold;
+		fc = 1 - (chaosThreshold - f)
+	}
+
+	let cuboidStyle: Style = {
+		...style,
+		strokeDashWidth: 0.2,
+		strokeDashFill: 1,
+	};
+
+	let cuboidXY = {...xy, r: xy.r/2};
+	let numCubes = 3;
+	let polyPts = G.polygon({...xy, phase: xy.phase + 0.5 * chaos, r: xy.r*(1+(4 * (chaos)))}, numCubes);
 	
 	for (let pt of polyPts) {
 		E.Cube(ctx, {...cuboidXY, ...pt, s: f, phase: 6 * chaos}, cuboidStyle);
