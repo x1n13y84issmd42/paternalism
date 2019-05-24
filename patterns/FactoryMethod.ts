@@ -7,7 +7,7 @@ namespace FactoryMethod {
 	//#region PRODUCT INTERFACE & CONTEXT
 
 	//	[Product] interface
-	interface IMessageTransport { post(message); }
+	interface IMessageTransport { post(err: Error); }
 
 	//	[Context] is the piece of application logic we want to protect from
 	//	changes related to the way we deliver notification messages.
@@ -15,12 +15,24 @@ namespace FactoryMethod {
 		constructor() {}
 		
 		process(err: Error) {
+			
+			//	Analyzing the call stack...
+			err.stack = err.stack.split('\n').sort((a, b) => Math.random() > 0.5 ? 1 : -1).join('\n');
+			
+			//	Exagerrating things a bit to grab attention...
+			err.message = err.message.toLocaleUpperCase();
+			
+			//	Doing more useful error processing...
+			err.name = err.name
+				.replace('Error', 'Success')
+				.replace('Invalid', 'Handsome');
+
+			//	* * * * * * * * * * * * * * * * * 
 			//	Invocation of the [Factory Method]
 			let transport = this.createTransport();
 
-			//	...
-			transport.post(err.message);
-			//	...
+			//	Usage of the fabricated [Product]
+			transport.post(err);
 		}
 
 		//	The [Factory Method] itself, left to be implemented in subclasses.
@@ -35,7 +47,7 @@ namespace FactoryMethod {
 
 	//	A standard, sms-based [Product] kind
 	class SMSTransport implements IMessageTransport {
-		post(message) { /* SMS implementation */ }
+		post(err: Error) { /* SMS implementation */ }
 	}
 	
 	//	An a corresponding [Factory Method] implementation
@@ -52,7 +64,7 @@ namespace FactoryMethod {
 
 	//	An alternative, email-based [Product] kind
 	class EmailTransport implements IMessageTransport {
-		post(message) { /* Email implementation */ }
+		post(err: Error) { /* Email implementation */ }
 	}	
 	
 	//	An a [Factory Method] produce email transports

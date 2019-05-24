@@ -14,15 +14,14 @@ namespace Policy {
 
 	//	A [Context] is a piece os application logic we want to protect from changes
 	//	related to certain behavior, that is now isolated in [Policies].
-	class NotificationService {
+	class OrderExecutor {
 		constructor(private transport: IMessageTransport) {}
 		
-		post(message) {
-			//	Preparations
-			this.transport.post(message);
-			//	Some logging
-			//	and error handling
-			//	and stuff.
+		execute(orderData) {
+			//	Executing the order.
+
+			//	Notifying the account owner.
+			this.transport.post(`The order #${orderData.id} has been executed.`);
 		}
 	}
 
@@ -58,8 +57,8 @@ namespace Policy {
 		'email': EMailTransport,
 	};
 
-	let upl = new NotificationService(new transports['sms']);
-	upl.post('Hello world');
+	let upl = new OrderExecutor(new transports['sms']);
+	upl.execute({ /*...*/ });
 
 	//#endregion
 }

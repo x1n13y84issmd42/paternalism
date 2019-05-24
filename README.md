@@ -4,6 +4,17 @@ A study on software design patterns
 ### The cover generator
 Requires Typescript. Builds with `tsc`.
 
+```
+TODO
+Moving point fields
+Additional FX:
+	sum all forces, highpass filter them, render smth cool at maximum points
+	force-based color split on elements
+More elements and animations:
+	not only rotating, but also growing variously
+	introduce more solid 3D elements
+```
+
 #### ffmpeg
 Generate a GIF using a generated palette image
 `ffmpeg -i 0001.png -vf palettegen palette.png`
