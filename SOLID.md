@@ -11,6 +11,8 @@ Author & mentor.\
 
 Definition of Responsibility
 * know your audience
+  * Content managers, Analysts, Developers
+  * Logging, Authentication, Requests Handling
 * theater/actor model
 * talk it through and look for the **and** word
 
