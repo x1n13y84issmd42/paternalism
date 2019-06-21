@@ -2,7 +2,11 @@
 A study on software design patterns
 
 ### The cover generator
-Requires Typescript. Builds with `tsc`.
+Requires Typescript. Builds with `tsc`, runs in `index.html`.
+`index.html#FPS=25,frames=125`
+
+#### Frame saver
+Is an Express Node app, builds with everything else, runs separately as `node out/framesaver.js`
 
 ```
 TODO
